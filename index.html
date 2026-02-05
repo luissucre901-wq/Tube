@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+
+    <title>YouTube</title>
+
+    <style>
+        /* Estilo de la Pantalla de Inicio (Splash Screen) */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff; /* Fondo blanco oficial */
+            overflow: hidden;
+        }
+
+        .splash-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .youtube-logo {
+            width: 120px; /* Tamaño similar al de inicio en Android */
+            height: auto;
+            /* Animación suave de entrada */
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Ocultar scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+
+    <script>
+        window.onload = function() {
+            // Esperamos un segundo pequeño para que el usuario vea el logo 
+            // y luego redirigimos a la versión móvil de YouTube
+            setTimeout(function() {
+                window.location.href = "https://m.youtube.com";
+            }, 1200); 
+        };
+    </script>
+</head>
+<body>
+
+    <div class="splash-container">
+        <img class="youtube-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube">
+    </div>
+
+</body>
+</html>
