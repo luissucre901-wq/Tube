@@ -1,68 +1,80 @@
-<!DOCTYPE html>
-<html lang="es">
+html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#ffffff">
-
-    <title>YouTube</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTube Pro Launcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* Estilo de la Pantalla de Inicio (Splash Screen) */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #ffffff; /* Fondo blanco oficial */
-            overflow: hidden;
+        :root { 
+            --bg-black: #0f0f0f; 
+            --glass-bg: rgba(25, 25, 25, 0.85); 
+            --text-white: #ffffff; 
+            --yt-red: #ff0000; 
+        }
+        
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-black); 
+            color: white; 
+            margin: 0; 
+            padding-top: 115px; /* Espacio para el header */
+            padding-bottom: 75px; 
+            overflow-x: hidden; 
         }
 
-        .splash-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* HEADER Y SECCIONES CON ANIMACIÓN DE OCULTAR */
+        .header-fixed { 
+            position: fixed; 
+            top: 0; 
+            width: 100%; 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease-in-out; /* Animación suave */
+        }
+        
+        /* Clase para esconder el menú */
+        .header-hidden {
+            transform: translateY(-100%);
         }
 
-        .youtube-logo {
-            width: 120px; /* Tamaño similar al de inicio en Android */
-            height: auto;
-            /* Animación suave de entrada */
-            animation: pulse 1.5s infinite ease-in-out;
+        .header { height: 56px; display: flex; align-items: center; padding: 0 16px; box-sizing: border-box; }
+        .logo-section { font-size: 19px; font-weight: bold; display: flex; align-items: center; }
+        .logo-section span { background: var(--yt-red); padding: 1px 5px; border-radius: 4px; margin-right: 4px; font-size: 14px; }
+        
+        .fake-search { 
+            background: rgba(255,255,255,0.1); 
+            flex: 1; margin: 0 10px; padding: 8px 15px; border-radius: 20px; 
+            color: #ccc; font-size: 14px; display: flex; justify-content: space-between; align-items: center; 
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
+        .sections-bar { display: flex; overflow-x: auto; padding: 10px 12px; gap: 8px; scrollbar-width: none; }
+        .sections-bar::-webkit-scrollbar { display: none; }
+        
+        .chip { 
+            background: rgba(255,255,255,0.15); color: white; padding: 6px 14px; 
+            border-radius: 8px; font-size: 14px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); 
         }
 
-        /* Ocultar scrollbar */
-        ::-webkit-scrollbar {
-            display: none;
+        /* FEED */
+        .feed { padding: 10px 12px; display: flex; flex-direction: column; gap: 20px; }
+        .card { border-radius: 12px; overflow: hidden; }
+        .card-thumb { width: 100%; height: 210px; border-radius: 12px; background-size: cover; background-position: center; background-color: #222; }
+        .card-title { font-size: 17px; font-weight: 500; padding: 10px 5px; margin: 0; }
+
+        /* NAV INFERIOR TRANSPARENTE */
+        .nav-bottom { 
+            position: fixed; bottom: 0; width: 100%; background: var(--glass-bg); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            height: 65px; display: flex; justify-content: space-around; align-items: center; 
+            border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000; 
         }
+        
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: white; font-size: 10px; }
+        .nav-item svg { width: 24px; height: 24px; fill: white; margin-bottom: 4px; }
+
+        /* BUSCADOR */
+        #search-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-black); z-index: 2000; display: none; flex-direction: column; }
     </style>
-
-    <script>
-        window.onload = function() {
-            // Esperamos un segundo pequeño para que el usuario vea el logo 
-            // y luego redirigimos a la versión móvil de YouTube
-            setTimeout(function() {
-                window.location.href = "https://m.youtube.com";
-            }, 1200); 
-        };
-    </script>
-</head>
-<body>
-
-    <div class="splash-container">
-        <img class="youtube-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube">
-    </div>
-
-</body>
-</html>
