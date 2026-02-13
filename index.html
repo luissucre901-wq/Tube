@@ -1,67 +1,485 @@
-html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#ffffff">
-
-    <title>YouTube</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tube Búsqueda Funcional + Bóveda</title>
     <style>
-        /* Estilo de la Pantalla de Inicio (Splash Screen) */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        body { 
+            background-color: #121212; 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: white; 
+            height: 100vh; 
+            overflow: hidden; 
+            position: relative; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .chip, .boton-buscador, .history-item, .more-option-item, .nav-button, .app-item {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
             display: flex;
-            justify-content: center;
             align-items: center;
-            background-color: #ffffff; /* Fondo blanco oficial */
+            justify-content: center;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .chips-wrapper { display: flex; gap: 10px; justify-content: flex-start; width: 100%; position: fixed; top: 15px; left: 15px; z-index: 1000; overflow-x: auto; padding-bottom: 10px; }
+        .chips-wrapper::-webkit-scrollbar { display: none; }
+        .chip { padding: 8px 16px; font-size: 14px; border: none; border-top: 1px solid #777; border-bottom: 1px solid #777; }
+        
+        .central-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .title-container { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 40px;
+        }
+        
+        .title-container h1 { 
+            font-size: 36px; 
+            margin: 0; 
+            font-weight: bold; 
+            margin-left: 10px;
+            background: linear-gradient(to bottom, #FF0000 40%, #FFFFFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .boton-buscador { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            width: 240px; 
+            padding: 8px 16px; 
+            background-color: rgba(26, 26, 26, 0.7); 
+            border: 1px solid rgba(51, 51, 51, 0.5); 
+            border-radius: 50px; 
+            font-size: 14px; 
+        }
+        
+        .icono-lupa svg { fill: white; }
+
+        /* Barra Navegación Inferior */
+        .nav-container { 
+            display: flex; 
+            position: fixed; 
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            z-index: 1000; 
+            gap: 10px;
+            justify-content: space-between;
+        }
+        
+        .nav-button { 
+            flex: 1;
+            padding: 8px 0;
+            font-size: 14px;
+            border: none;
+            border-top: 1px solid #777;
+            border-bottom: 1px solid #777;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2a2a2a;
+        }
+        .nav-button svg { margin-bottom: 4px; fill: white; width: 20px; height: 20px; }
+        
+        /* Overlays Generales */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #121212; z-index: 2000; display: none; flex-direction: column; padding: 10px; box-sizing: border-box; }
+        
+        .overlay-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+            padding-top: 5px;
+            justify-content: space-between;
+        }
+        
+        .search-input-container { 
+            flex-grow: 1; 
+            display: flex; 
+            align-items: center; 
+            background-color: #1a1a1a; 
+            border-radius: 50px; 
+            border: 1px solid #333; 
+            padding: 0 10px; 
+            height: 35px;
+        }
+        .search-input { 
+            flex-grow: 1; 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 14px;
+            outline: none; 
+            width: 100%;
+        }
+        
+        /* Flecha de volver corregida */
+        .icono-accion {
+            cursor: pointer;
+            fill: white;
+            margin: 0 2px;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            display: flex; /* Asegura centrado */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Estilos Historial */
+        .history-container {
+            margin-top: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .history-item {
+            justify-content: flex-start;
+            padding: 8px;
+            margin-bottom: 3px;
+            font-size: 12px;
+            color: #ccc;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            min-height: 20px;
+            border: 1px solid #444;
+        }
+        .delete-history-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        /* --- Estilos Mejorados "Más Opciones" --- */
+        .more-options-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 15px 10px;
+            margin-top: 10px;
+            overflow-y: auto;
+        }
+        .more-option-item {
+            flex-direction: column;
+            padding: 10px 5px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            height: 115px;
+            justify-content: center;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+        
+        .more-option-item:active {
+            transform: scale(0.95);
+        }
+
+        /* --- CORREGIDO: Tamaño uniforme SOLO para iconos de "Más" --- */
+        .more-option-item svg, .spotify-icon-wrapper {
+            width: 60px; /* Tamaño uniforme */
+            height: 60px; /* Tamaño uniforme */
+            margin-bottom: 8px;
+            border-radius: 15px; /* Radio uniforme */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px; /* Espacio interior */
+        }
+        
+        /* Ajuste específico para el logo de spotify interior */
+        .spotify-icon-wrapper svg {
+            width: 45px;
+            height: 45px;
+            fill: white;
+            padding: 0;
+        }
+
+        .more-option-item span {
+            color: white;
+            margin-top: 5px;
+            word-break: break-word;
+            font-size: 11px;
+            height: 25px; /* Altura fija para el texto */
             overflow: hidden;
         }
 
-        .splash-container {
+        /* --- ESTILOS DE LA BÓVEDA (INTEGRADOS) --- */
+        .boveda-header {
+            width: 100%;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start; 
             align-items: center;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .youtube-logo {
-            width: 120px; /* Tamaño similar al de inicio en Android */
-            height: auto;
-            /* Animación suave de entrada */
-            animation: pulse 1.5s infinite ease-in-out;
+        .boveda-header h2 {
+            margin: 0;
+            font-size: 18px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border: 1px solid #333;
+            background-color: #1a1a1a;
+            padding: 10px;
+            height: 110px;
+        }
+        .app-item:active {
+            opacity: 0.7;
+        }
+        
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background-color: white; 
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            padding: 5px;
+            overflow: hidden;
+        }
+        
+        .app-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .app-icon img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+        
+        .app-label {
+            font-size: 11px;
+            color: white;
+            font-weight: 500;
+            margin-top: 5px;
+            word-break: break-word;
         }
 
-        /* Ocultar scrollbar */
-        ::-webkit-scrollbar {
+        /* --- Estilos del Modal Personalizado --- */
+        .modal-overlay {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 3000; /* Mayor z-index */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background-color: #121212;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            width: 45%;
+        }
+
+        .btn-cancel {
+            background-color: #333;
+            color: white;
+        }
+
+        .btn-accept {
+            background-color: #d32f2f;
+            color: white;
         }
     </style>
-
-    <script>
-        window.onload = function() {
-            // Esperamos un segundo pequeño para que el usuario vea el logo 
-            // y luego redirigimos a la versión móvil de YouTube
-            setTimeout(function() {
-                window.location.href = "https://m.youtube.com";
-            }, 1200); 
-        };
-    </script>
 </head>
 <body>
 
-    <div class="splash-container">
-        <img class="youtube-logo" src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube">
+    <div class="chips-wrapper">
+        <button class="chip" onclick="navegar('Inicio', 'https://www.youtube.com')">Todo</button>
+        <button class="chip" onclick="buscar('Películas')">Películas</button>
+        <button class="chip" onclick="buscar('Música')">Música</button>
+        <button class="chip" onclick="buscar('Deportes')">Deporte</button>
     </div>
 
-</body>
-</html>
+    <div class="central-wrapper">
+        <div class="title-container">
+            <svg id="Flat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="54" height="54">
+              <path d="M228.69824,67.05908C226.897,55.71533,216.124,45.41943,204.65137,44.10449a707.50644,707.50644,0,0,0-153.33448.00342c-11.438,1.311-22.21093,11.606-24.0205,22.98486a402.51167,402.51167,0,0,0,.00537,121.84912C29.10547,200.28662,39.87891,210.582,51.34863,211.895A706.45765,706.45765,0,0,0,128,216.06055a706.45765,706.45765,0,0,0,76.65137-4.16553l.03076-.00342c11.43994-1.30859,22.21338-11.60449,24.02148-22.98437A402.5053,402.5053,0,0,0,228.69824,67.05908ZM216.84668,187.05859c-.96191,6.0542-7.4043,12.20508-13.52051,12.91016a695.32811,695.32811,0,0,1-150.64355.001c-6.11817-.70069-12.56641-6.855-13.52393-12.877a390.407,390.407,0,0,1-.00537-118.15039c.96289-6.05664,7.41211-12.21142,13.49805-12.90918a695.38044,695.38044,0,0,1,150.665-.00341c6.12011.70166,12.56836,6.85546,13.5249,12.87744A390.41336,390.41336,0,0,1,216.84668,187.05859Z" fill="red"></path>
+              <path d="M153.51856,123.00781l-48-32A5.99992,5.99992,0,0,0,106,96v64a5.99981,5.99981,0,0,0,9.32812,4.99219l48-32a5.99969,5.99969,0,0,0,0-9.98438ZM118,148.78906V107.21094L149.18359,128Z" fill="white"></path>
+            </svg>
+            <h1>Tube</h1>
+        </div>
+
+        <button class="boton-buscador" onclick="abrirBusqueda()">
+            <span class="texto-buscar">Buscar en Tube</span>
+            <span class="icono-lupa">
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="nav-container">
+        <button class="nav-button" onclick="navegar('Inicio', 'https://www.youtube.com')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>Inicio
+        </button>
+        <button class="nav-button" onclick="navegar('Shorts', 'https://www.youtube.com/shorts')">
+            <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.83 0-1.5-.67-1.5-1.5 0-.35.13-.68.33-.94L13 3h1l-1 7h4.5c.83 0 1.5.67 1.5 1.5 0 .35-.13.68-.33.94L11 21z"></path></svg>Shorts
+        </button>
+        <button class="nav-button" onclick="iniciarProcesoBoveda()">
+            <svg viewBox="0 0 24 24"><path d="M12,17C10.89,17 10,16.1 10,15C10,13.9 10.89,13 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M18,8H17V6A5,5 0 0,0 12,1A5,5 0 0,0 7,6V8H6A2,2 0 0,0 4,10V20A2,2 0,0,0 6,22H18A2,2 0,0,0 20,20V10A2,2 0,0,0 18,8M9,6A3,3 0 0,1 12,3A3,3 0 0,1 15,6V8H9V6M18,20H6V10H18V20Z" /></svg>Bóveda
+        </button>
+        <button class="nav-button" onclick="abrirMas()">
+            <svg viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>Más
+        </button>
+    </div>
+
+    <div class="overlay" id="searchOverlay">
+        <div class="overlay-header">
+            <svg class="icono-accion" onclick="cerrarOverlay('searchOverlay')" viewBox="0 0 24 24" width="24" height="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+            <div class="search-input-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Buscar en Tube">
+                <svg class="icono-accion" onclick="borrarInput()" viewBox="0 0 24 24" width="20" height="20"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </div>
+            <svg class="icono-accion" onclick="realizarBusquedaClick()" viewBox="0 0 24 24" width="24" height="24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+        </div>
+        <div class="history-container" id="historyList"></div>
+        <button class="delete-history-btn" onclick="limpiarHistorial()">Borrar Historial</button>
+    </div>
+
+    <div class="overlay" id="moreOverlay">
+        <div class="overlay-header">
+            <svg class="icono-accion" onclick="cerrarOverlay('moreOverlay')" viewBox="0 0 24 24" width="24" height="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+            <h2 style="margin: 0; font-size: 18px;">Entretenimiento</h2>
+            <div style="width: 24px;"></div>
+        </div>
+        
+        <div class="more-options-container">
+            <div class="more-option-item" onclick="navegar('Spotify', 'https://open.spotify.com')">
+                <div class="spotify-icon-wrapper">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.52 17.3c-.15.24-.48.33-.78.18-2.1-1.26-4.74-1.53-7.86-.84-.3.06-.6-.15-.66-.45-.06-.3.15-.6.45-.66 3.39-.75 6.36-.45 8.76.99.27.15.36.51.21.78zm1.14-2.52c-.21.33-.63.45-.96.24-2.43-1.5-6.15-1.92-9.03-1.05-.36.09-.72-.12-.81-.48-.09-.36.12-.72.48-.81 3.24-1 7.41-.54 10.23 1.17.33.21.45.63.24.93zm.06-2.58c-2.88-1.71-7.53-1.86-10.26-1.02-.45.15-.9-.12-1.05-.57-.15-.45.12-.9.57-1.05 3.12-.96 8.28-.78 11.64 1.23.42.24.57.78.33 1.2-.24.36-.78.51-1.2.27z"></path>
+                    </svg>
+                </div>
+                <span>Spotify</span>
+            </div>
+
+            <div class="more-option-item" onclick="navegar('Películas', 'https://vix.com/es-es/ondemand/peliculas')">
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                    viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                <circle style="fill:#F05228;" cx="256" cy="256" r="256"></circle>
+                <polygon style="fill:#FFFFFF;" points="193.93,148.48 380.16,256 193.93,363.52 "></polygon>
+                </svg>
+                <span>Películas</span>
+            </div>
+
+            <div class="more-option-item" onclick="navegar('Juegos', 'https://poki.com/es')">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <defs><style>.cls-1{fill:none;}.cls-2{fill:#007824;}.cls-3{fill:#00b538;}.cls-4{fill:#00db42;}.cls-5{fill:#fff;}</style></defs>
+                    <title></title><g data-name="Layer 2" id="Layer_2"><g data-name="Layer 3" id="Layer_3">
+                        <rect class="cls-1" height="24" width="24"></rect>
+                        <path class="cls-2" d="M1,12C1,4,4,1,12,1S23,4,23,12,20,23,12,23,1,20,1,12"></path>
+                        <path class="cls-3" d="M19.9,16.27,18.82,9.84h0c-6.76-.48-12.54-1-12.54,1.08h0a3.85,3.85,0,0,0,3.86,3.84h4.44l2.79,2.8A1.49,1.49,0,0,0,19.9,16.27Z"></path>
+                        <path class="cls-4" d="M15,6H9A3.85,3.85,0,0,0,5.18,9.84h0L4.1,16.27a1.49,1.49,0,0,0,2.53,1.29l3.86-3.88H15A3.84,3.84,0,0,0,18.8,9.84h0A3.84,3.84,0,0,0,15,6Z"></path>
+                        <circle class="cls-5" cx="13.75" cy="9.84" r="0.6"></circle>
+                        <circle class="cls-5" cx="16.16" cy="9.84" r="0.6"></circle>
+                        <circle class="cls-5" cx="14.95" cy="8.64" r="0.6"></circle>
+                        <circle class="cls-5" cx="14.95" cy="11.04" r="0.6"></circle>
+                        <path class="cls-5" d="M10.73,9.36H9.64a.12.12,0,0,1-.12-.12V8.16A.12.12,0,0,0,9.4,8H8.68a.12.12,0,0,0-.12.12V9.24a.12.12,0,0,1-.12.12H7.35a.12.12,0,0,0-.12.12v.72a.12.12,0,0,0,.12.12H8.44a.12.12,0,0,1,.12.12v1.08a.12.12,0,0,0,.12.12H9.4a.12.12,0,0,0,.12-.12V10.44a.12.12,0,0,1,.12-.12h1.09a.12.12,0,0,0,.12-.12V9.48A.12.12,0,0,0,10.73,9.36Z"></path>
+                    </g></g>
+                </svg>
+                <span>Poki</span>
+            </div>
+            
+            <div class="more-option-item" onclick="navegar('Google', 'https://google.com')">
+                <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="256" cy="256" r="256" fill="#fff"></circle>
+                    <path fill="#4285F4" d="M459.5,236.7c0-16.7-1.5-32.8-4.2-48.2H256v91.2h109.8c-4.7,25.4-18.7,46.9-39.7,60.9v49.5h65.9 C436.5,357,459.5,302.3,459.5,236.7z"></path>
+                    <path fill="#34A853" d="M256,459.5c57.6,0,105.9-19.1,141.2-51.7l-65.9
